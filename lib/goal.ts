@@ -48,7 +48,7 @@ export async function executeGoal(ge: GoalExecutor): Promise<number> {
             owner: goalEvent.repo.owner,
             repo: goalEvent.repo.name,
             branch: goalEvent.branch,
-            sha: goalEvent.push.after.sha || undefined,
+            sha: goalEvent.push.after?.sha || undefined,
         }), process.env.ATOMIST_PROJECT_DIR) as any;
 
         const result = ge({ goalEvent, project, log });
