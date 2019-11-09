@@ -30,7 +30,6 @@ import * as yargs from "yargs";
 import {
     executeGoal,
     findGoal,
-    GoalExecutor,
 } from "../lib/goal";
 
 configureLogging(PlainLogging);
