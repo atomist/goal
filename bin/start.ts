@@ -78,7 +78,7 @@ async function start(): Promise<any> {
             print.error("No exported goal found");
             return 1;
         }
-        return executeGoal(goal as GoalExecutor);
+        return executeGoal(goal);
     })
         .showHelpOnFail(true, "Specify --help for available options")
         .alias("help", ["h", "?"])
