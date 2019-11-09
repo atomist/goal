@@ -1,10 +1,11 @@
 {
   "name": "@atomist/goal",
   "version": "0.1.0",
-  "description": "my new project",
+  "description": "Package to implement Atomist SDM goals in TypeScript/JavaScript",
   "author": {
-    "name": "Christian Dupuis",
-    "email": "cd@atomist.com"
+    "name": "Atomist",
+    "email": "support@atomist.com",
+    "url": "https://atomist.com/"
   },
   "license": "Apache-2.0",
   "homepage": "https://github.com/atomist/goal#readme",
@@ -24,8 +25,15 @@
   "types": "./index.d.ts",
   "dependencies": {
     "@atomist/automation-client": "1.8.0-master.20191107225525",
+    "@atomist/cli": "^1.8.0",
     "@atomist/sdm": "1.8.0-dynamic-goals.20191108140247",
-    "@atomist/sdm-core": "1.8.0-dynamic-goals.20191108152504"
+    "@atomist/sdm-core": "1.8.0-dynamic-goals.20191108152504",
+    "app-root-path": "^3.0.0",
+    "fs-extra": "^8.1.0",
+    "glob": "^7.1.6",
+    "lodash": "^4.17.15",
+    "source-map-support": "^0.5.16",
+    "yargs": "^14.2.0"
   },
   "devDependencies": {
     "@atomist/sdm-local": "1.2.2-master.20191011215150",
