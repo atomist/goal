@@ -22,15 +22,16 @@ import {
 import * as print from "@atomist/cli/lib/print";
 import {
     LoggingProgressLog,
-    ProgressLog,
+    ProjectAwareGoalInvocation,
     SdmGoalEvent,
+    toProjectAwareGoalInvocation,
 } from "@atomist/sdm";
 import { toArray } from "@atomist/sdm-core";
 import * as fs from "fs-extra";
 import * as glob from "glob";
 import * as path from "path";
 
-export type GoalExecutor = (gi: { goalEvent: SdmGoalEvent, project: GitProject, log: ProgressLog }) =>
+export type GoalExecutor = (gi: Pick<ProjectAwareGoalInvocation, "goalEvent" | "project" | "progressLog" | "spawn" | "exec">) =>
     Promise<void | SdmGoalEvent & { push: { version: string } }>;
 
 export async function executeGoal(ge: GoalExecutor): Promise<number> {
@@ -41,7 +42,7 @@ export async function executeGoal(ge: GoalExecutor): Promise<number> {
         return 1;
     }
 
-    const log = new LoggingProgressLog("version", "info");
+    const progressLog = new LoggingProgressLog("version", "info");
 
     try {
         const goalEvent: SdmGoalEvent = await fs.readJson(process.env.ATOMIST_GOAL);
@@ -52,7 +53,7 @@ export async function executeGoal(ge: GoalExecutor): Promise<number> {
             sha: goalEvent.push.after?.sha || undefined,
         }), process.env.ATOMIST_PROJECT_DIR) as any;
 
-        const result = ge({ goalEvent, project, log });
+        const result = ge(toProjectAwareGoalInvocation(project, { goalEvent, project, progressLog } as any));
         if (!!result) {
             await fs.writeJson(process.env.ATOMIST_RESULT, result);
         }
@@ -62,7 +63,7 @@ export async function executeGoal(ge: GoalExecutor): Promise<number> {
         print.error(e.stack);
         return 102;
     } finally {
-        await log.close();
+        await progressLog.close();
     }
 }
 
