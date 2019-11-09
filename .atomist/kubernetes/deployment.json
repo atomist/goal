@@ -1,0 +1,119 @@
+{
+  "spec": {
+    "template": {
+      "spec": {
+        "containers": [
+          {
+            "env": [
+              {
+                "name": "ATOMIST_CONFIG_PATH",
+                "value": "/opt/atm/client.config.json"
+              },
+              {
+                "name": "ATOMIST_GOAL_LAUNCHER",
+                "value": "kubernetes"
+              },
+              {
+                "name": "FORCE_COLOR",
+                "value": "1"
+              },
+              {
+                "name": "TMPDIR",
+                "value": "/tmp"
+              }
+            ],
+            "livenessProbe": {
+              "httpGet": {
+                "path": "/health"
+              },
+              "initialDelaySeconds": 20
+            },
+            "readinessProbe": {
+              "httpGet": {
+                "path": "/health"
+              },
+              "initialDelaySeconds": 20
+            },
+            "resources": {
+              "limits": {
+                "cpu": "1000m",
+                "memory": "512Mi"
+              },
+              "requests": {
+                "cpu": "100m",
+                "memory": "384Mi"
+              }
+            },
+            "securityContext": {
+              "allowPrivilegeEscalation": false,
+              "privileged": false,
+              "readOnlyRootFilesystem": true,
+              "runAsGroup": 2866,
+              "runAsNonRoot": true,
+              "runAsUser": 2866
+            },
+            "volumeMounts": [
+              {
+                "name": "empty-sdm",
+                "mountPath": "/opt/atm",
+                "readOnly": true
+              },
+              {
+                "mountPath": "/home/atomist",
+                "name": "atomist-home"
+              },
+              {
+                "mountPath": "/tmp",
+                "name": "sdm-tmp"
+              }
+            ]
+          }
+        ],
+        "initContainers": [
+          {
+            "args": [
+              "git config --global user.email 'bot@atomist.com' && git config --global user.name 'Atomist Bot'"
+            ],
+            "command": ["/bin/sh", "-c"],
+            "image": "atomist/sdm-base:0.3.0",
+            "name": "atomist-home-git",
+            "securityContext": {
+              "allowPrivilegeEscalation": false,
+              "privileged": false,
+              "readOnlyRootFilesystem": true,
+              "runAsGroup": 2866,
+              "runAsNonRoot": true,
+              "runAsUser": 2866
+            },
+            "volumeMounts": [
+              {
+                "mountPath": "/home/atomist",
+                "name": "atomist-home"
+              }
+            ]
+          }
+        ],
+        "securityContext": {
+          "fsGroup": 2866
+        },
+        "volumes": [
+          {
+            "name": "empty-sdm",
+            "secret": {
+              "defaultMode": 288,
+              "secretName": "empty-sdm"
+            }
+          },
+          {
+            "emptyDir": {},
+            "name": "atomist-home"
+          },
+          {
+            "emptyDir": {},
+            "name": "sdm-tmp"
+          }
+        ]
+      }
+    }
+  }
+}

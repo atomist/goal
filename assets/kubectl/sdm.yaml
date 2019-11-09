@@ -1,0 +1,120 @@
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  labels:
+    owner: atomist
+  name: sdm
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: empty-sdm
+  namespace: sdm
+---
+apiVersion: rbac.authorization.k8s.io/v1beta1
+kind: Role
+metadata:
+  name: empty-sdm
+  namespace: sdm
+rules:
+  - apiGroups: [""]
+    resources: ["pods"]
+    verbs: ["get", "list", "watch", "create", "update", "patch", "delete"]
+  - apiGroups: ["extensions", "apps"]
+    resources: ["deployments"]
+    verbs: ["get", "list", "watch"]
+  - apiGroups: ["batch"]
+    resources: ["jobs"]
+    verbs: ["get", "list", "watch", "create", "update", "patch", "delete"]
+---
+apiVersion: rbac.authorization.k8s.io/v1beta1
+kind: RoleBinding
+metadata:
+  name: empty-sdm
+  namespace: sdm
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: empty-sdm
+subjects:
+  - kind: ServiceAccount
+    name: empty-sdm
+    namespace: sdm
+---
+kind: Deployment
+apiVersion: apps/v1
+metadata:
+  name: empty-sdm
+  namespace: sdm
+  labels:
+    app.kubernetes.io/name: empty-sdm
+spec:
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: empty-sdm
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: empty-sdm
+        version: "0"
+    spec:
+      containers:
+      - env:
+        - name: ATOMIST_CONFIG_PATH
+          value: /opt/atm/client.config.json
+        - name: ATOMIST_GOAL_LAUNCHER
+          value: kubernetes
+        - name: ATOMIST_POD_NAMESPACE
+          valueFrom:
+            fieldRef:
+              fieldPath: metadata.namespace
+        - name: FORCE_COLOR
+          value: "1"
+        image: atomist-seeds/empty-sdm:1.0.0
+        name: empty-sdm
+        ports:
+        - containerPort: 2866
+          name: http
+          protocol: TCP
+        livenessProbe:
+          failureThreshold: 3
+          httpGet:
+            path: "/health"
+            port: 2866
+            scheme: HTTP
+          initialDelaySeconds: 20
+          periodSeconds: 20
+          successThreshold: 1
+          timeoutSeconds: 3
+        readinessProbe:
+          failureThreshold: 3
+          httpGet:
+            path: "/health"
+            port: 2866
+            scheme: HTTP
+          initialDelaySeconds: 20
+          periodSeconds: 20
+          successThreshold: 1
+          timeoutSeconds: 3
+        resources:
+          limits:
+            cpu: 1000m
+            memory: 512Mi
+          requests:
+            cpu: 100m
+            memory: 384Mi
+        volumeMounts:
+        - mountPath: /opt/atm
+          name: automation
+          readOnly: true
+      serviceAccountName: empty-sdm
+      volumes:
+      - name: empty-sdm
+        secret:
+          secretName: empty-sdm
+  strategy:
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 0
+    type: RollingUpdate
