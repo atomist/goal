@@ -37,8 +37,7 @@ export type GoalExecutor = (gi: Pick<ProjectAwareGoalInvocation, "goalEvent" | "
 
 export type SdmGoalResult =
     Pick<SdmGoalEvent, "state" | "description" | "phase" | "externalUrls" | "data">
-    & { push: { version: string } }
-    & { push: { after: { images: Array<{ imageName: string }> } } };
+    & { push: { after: { version: string, images: Array<{ imageName: string }> } } };
 
 export async function executeGoal(goal: { goalExecutor: GoalExecutor, name: string }): Promise<number> {
 
