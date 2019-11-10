@@ -75,7 +75,7 @@ async function start(): Promise<any> {
         });
         if (!goal) {
             print.error("No exported goal found");
-            return 1;
+            process.exit(101);
         }
         return executeGoal(goal);
     })
