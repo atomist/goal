@@ -17,3 +17,8 @@
 export {
     GoalExecutor,
 } from "./lib/goal";
+
+import * as client from "@atomist/automation-client";
+import * as sdm from "@atomist/sdm";
+import * as sdm_core from "@atomist/sdm-core";
+export { client, sdm, sdm_core };
