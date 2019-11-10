@@ -21,7 +21,6 @@ import {
 } from "@atomist/automation-client";
 import * as print from "@atomist/cli/lib/print";
 import {
-    LoggingProgressLog,
     ProjectAwareGoalInvocation,
     SdmGoalEvent,
     toProjectAwareGoalInvocation,
@@ -30,11 +29,12 @@ import { toArray } from "@atomist/sdm-core";
 import * as fs from "fs-extra";
 import * as glob from "glob";
 import * as path from "path";
+import { PrintLoggingProgressLog } from "./PrintLoggingProgressLog";
 
 export type GoalExecutor = (gi: Pick<ProjectAwareGoalInvocation, "goalEvent" | "project" | "progressLog" | "spawn" | "exec">) =>
     Promise<void | SdmGoalEvent & { push: { version: string } }>;
 
-export async function executeGoal(ge: GoalExecutor): Promise<number> {
+export async function executeGoal(goal: { goalExecutor: GoalExecutor, name: string }): Promise<number> {
 
     if (!process.env.ATOMIST_GOAL || !process.env.ATOMIST_PROJECT_DIR || !process.env.ATOMIST_RESULT) {
         print.error(`Missing environment variables, aborting: ATOMIST_GOAL=${process.env.ATOMIST_GOAL} ` +
@@ -42,7 +42,7 @@ export async function executeGoal(ge: GoalExecutor): Promise<number> {
         return 1;
     }
 
-    const progressLog = new LoggingProgressLog("version", "info");
+    const progressLog = new PrintLoggingProgressLog(goal.name);
 
     try {
         const goalEvent: SdmGoalEvent = await fs.readJson(process.env.ATOMIST_GOAL);
@@ -53,7 +53,7 @@ export async function executeGoal(ge: GoalExecutor): Promise<number> {
             sha: goalEvent.push.after?.sha || undefined,
         }), process.env.ATOMIST_PROJECT_DIR) as any;
 
-        const result = ge(toProjectAwareGoalInvocation(project, { goalEvent, project, progressLog } as any));
+        const result = goal.goalExecutor(toProjectAwareGoalInvocation(project, { goalEvent, project, progressLog } as any));
         if (!!result) {
             await fs.writeJson(process.env.ATOMIST_RESULT, result);
         }
@@ -67,7 +67,7 @@ export async function executeGoal(ge: GoalExecutor): Promise<number> {
     }
 }
 
-export function findGoal(options: { cwd: string, pattern?: string, name?: string }): GoalExecutor | undefined {
+export function findGoal(options: { cwd: string, pattern?: string, name?: string }): { goalExecutor: GoalExecutor, name: string } | undefined {
     const files = resolveFiles(options.cwd, options.pattern);
     for (const file of files) {
         const goalFile = require(path.join(options.cwd, file));
@@ -76,7 +76,7 @@ export function findGoal(options: { cwd: string, pattern?: string, name?: string
                 const goal = goalFile[k];
                 if (!!goal) {
                     print.info(`Starting goal executor '${k}' from '${path.join(options.cwd, file)}'`);
-                    return goal;
+                    return { goalExecutor: goal, name: k };
                 }
             }
         }
