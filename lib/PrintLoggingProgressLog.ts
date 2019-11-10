@@ -14,8 +14,10 @@
  * limitations under the License.
  */
 
-import { ProgressLog } from "@atomist/sdm";
-import { format } from "@atomist/sdm/src/lib/api-helper/log/format";
+import {
+    format,
+    ProgressLog,
+} from "@atomist/sdm";
 
 export class PrintLoggingProgressLog implements ProgressLog {
 
