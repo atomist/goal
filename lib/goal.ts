@@ -29,9 +29,10 @@ import { toArray } from "@atomist/sdm-core";
 import * as fs from "fs-extra";
 import * as glob from "glob";
 import * as path from "path";
+import { DeepPartial } from "ts-essentials";
 import { PrintLoggingProgressLog } from "./PrintLoggingProgressLog";
 
-export type GoalExecutor = (gi: Pick<ProjectAwareGoalInvocation, "goalEvent" | "project" | "progressLog" | "spawn" | "exec">) =>
+export type GoalExecutor = (gi: DeepPartial<Pick<ProjectAwareGoalInvocation, "goalEvent" | "project" | "progressLog" | "spawn" | "exec">>) =>
     Promise<void | SdmGoalResult>;
 
 export type SdmGoalResult =
