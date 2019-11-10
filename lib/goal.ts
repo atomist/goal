@@ -60,7 +60,7 @@ export async function executeGoal(goal: { goalExecutor: GoalExecutor, name: stri
 
         const result = goal.goalExecutor(toProjectAwareGoalInvocation(project, { goalEvent, project, progressLog } as any));
         if (!!result) {
-            await fs.writeJson(process.env.ATOMIST_RESULT, result);
+            await fs.writeJson(process.env.ATOMIST_RESULT, { SdmGoal: result });
         }
         return 0;
     } catch (e) {
