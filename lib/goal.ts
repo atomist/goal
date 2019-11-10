@@ -32,7 +32,12 @@ import * as path from "path";
 import { PrintLoggingProgressLog } from "./PrintLoggingProgressLog";
 
 export type GoalExecutor = (gi: Pick<ProjectAwareGoalInvocation, "goalEvent" | "project" | "progressLog" | "spawn" | "exec">) =>
-    Promise<void | SdmGoalEvent & { push: { version: string } }>;
+    Promise<void | SdmGoalResult>;
+
+export type SdmGoalResult =
+    Pick<SdmGoalEvent, "state" | "description" | "phase" | "externalUrls" | "data">
+    & { push: { version: string } }
+    & { push: { after: { images: Array<{ imageName: string }> } } };
 
 export async function executeGoal(goal: { goalExecutor: GoalExecutor, name: string }): Promise<number> {
 
