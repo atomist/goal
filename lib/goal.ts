@@ -58,13 +58,13 @@ export async function executeGoal(goal: { goalExecutor: GoalExecutor, name: stri
             sha: goalEvent.push.after?.sha || undefined,
         }), process.env.ATOMIST_PROJECT_DIR) as any;
 
-        const result = goal.goalExecutor(toProjectAwareGoalInvocation(project, { goalEvent, project, progressLog } as any));
+        const result = await goal.goalExecutor(toProjectAwareGoalInvocation(project, { goalEvent, project, progressLog } as any));
         if (!!result) {
             await fs.writeJson(process.env.ATOMIST_RESULT, { SdmGoal: result });
         }
         return 0;
     } catch (e) {
-        print.error(`Unhandled error: ${e.message}\n`);
+        print.error(`Unhandled error: ${e.message}`);
         print.error(e.stack);
         return 102;
     } finally {
